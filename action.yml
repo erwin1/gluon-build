@@ -10,9 +10,19 @@ inputs:
 runs:
   using: "composite"
   steps: 
+    - name: setup android certs
+      run: |
+          printf "${{ secrets.GLUON_ANDROID_KEYSTORE_BASE64 }}" > keystore.base64
+          base64 -d keystore.base64 > /home/runner/my.keystore
+          ls -l /home/runner/my.keystore  
+      shell: bash
     - run: printf "${{ inputs.gluon-license }}" > src/main/resources/gluonmobile.license
       shell: bash
     - run: mvn -P${{ inputs.target }} client:build client:package
       shell: bash
       env:
         GRAALVM_HOME: ${{ env.JAVA_HOME }}
+        GLUON_ANDROID_KEYSTOREPATH: /home/runner/my.keystore
+        GLUON_ANDROID_KEYSTORE_PASSWORD: ${{ secrets.GLUON_ANDROID_KEYSTORE_PASSWORD }}
+        GLUON_ANDROID_KEYALIAS: ${{ secrets.GLUON_ANDROID_KEYALIAS }}
+        GLUON_ANDROID_KEYALIAS_PASSWORD: ${{ secrets.GLUON_ANDROID_KEYALIAS_PASSWORD }}        
